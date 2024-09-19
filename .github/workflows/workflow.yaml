@@ -8,7 +8,7 @@ jobs:
     name: Lint project and test.
     if: ${{ github.event.comment.body == '/run-ci' }}
     permissions:
-      contents: write
+      issues: write
     runs-on: ubuntu-latest
     steps:
       - name: Create comment

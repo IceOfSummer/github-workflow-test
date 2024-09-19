@@ -1,0 +1,12 @@
+on:
+  issue_comment:
+    types: [created]
+jobs:
+  running_ci:
+    name: Lint project and test.
+    if: ${{ github.event.issue.bodyText == '/run-ci' }}
+    runs-on: ubuntu-latest
+    steps:
+     - run: echo "You just called $"
+       env:
+         NUMBER: ${{ github.event.issue.comments }}

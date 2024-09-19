@@ -1,10 +1,14 @@
 on:
   issue_comment:
     types: [ created ]
+
+
 jobs:
   running_ci:
     name: Lint project and test.
     if: ${{ github.event.comment.body == '/run-ci' }}
+    permissions:
+      contents: write
     runs-on: ubuntu-latest
     steps:
       - name: Create comment

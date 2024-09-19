@@ -1,20 +1,20 @@
 on:
   issue_comment:
-    types: [created]
+    types: [ created ]
 jobs:
   running_ci:
     name: Lint project and test.
     if: ${{ github.event.comment.body == '/run-ci' }}
     runs-on: ubuntu-latest
     steps:
-     - name: Create comment
-       uses: actions-cool/issues-helper@v3
-       with:
-         actions: 'create-comment'
-         token: ${{ secrets.GITHUB_TOKEN }}
-         issue-number: ${{ github.event.issue.number }}
-         body: |
-           Hello ${{ github.event.issue.user.login }}. Add some comments.
+      - name: Create comment
+        uses: actions-cool/issues-helper@v3
+        with:
+          actions: 'create-comment'
+          token: ${{ secrets.GITHUB_TOKEN }}
+          issue-number: ${{ github.event.issue.number }}
+          body: |
+            Hello ${{ github.event.issue.user.login }}. Add some comments.
 
-           你好 ${{ github.event.issue.user.login }}。巴拉巴拉。
-         emoji: '+1' or '+1,heart'
+            你好 ${{ github.event.issue.user.login }}。巴拉巴拉。
+          emoji: '+1' or '+1,heart'

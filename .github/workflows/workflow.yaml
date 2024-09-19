@@ -9,6 +9,8 @@ jobs:
     if: ${{ github.event.comment.body == '/run-ci' }}
     permissions:
       issues: write
+      pull-requests: write
+      contents: write
     runs-on: ubuntu-latest
     steps:
       - name: Create comment

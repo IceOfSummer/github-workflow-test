@@ -9,9 +9,7 @@ jobs:
   add_checks:
     runs-on: ubuntu-latest
     permissions:
-      issues: write
-      pull-requests: write
-      contents: write
+      checks: write
     steps:
       - name: Add checks
         uses: actions/github-script@v7

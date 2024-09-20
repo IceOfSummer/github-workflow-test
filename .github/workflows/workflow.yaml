@@ -17,8 +17,12 @@ jobs:
         id: pr_branch
         run: |
           pr_number=$(echo "${{ github.event.issue.pull_request.url }}" | awk -F'/' '{print $NF}')
+          echo "PR number is: $pr_number"
           pr_branch=$(gh pr view $pr_number --json headRefName -q .headRefName)
+          echo "Pull request branch is: $pr_branch"
           echo "branch=${pr_branch}" >> $GITHUB_OUTPUT
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Check out the repository
         uses: actions/checkout@v3

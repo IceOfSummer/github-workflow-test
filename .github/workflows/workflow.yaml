@@ -13,10 +13,17 @@ jobs:
       contents: write
     runs-on: ubuntu-latest
     steps:
+      - name: Resolve pr branch
+        id: pr_branch
+        run: |
+          pr_number=$(echo "${{ github.event.issue.pull_request.url }}" | awk -F'/' '{print $NF}')
+          pr_branch=$(gh pr view $pr_number --json headRefName -q .headRefName)
+          echo "branch=${pr_branch}" >> $GITHUB_OUTPUT
+
       - name: Check out the repository
         uses: actions/checkout@v3
         with:
-          ref: ${{ github.head_ref }}
+          ref: ${{ steps.pr_branch.outputs.branch }}
 
       # - name: Use Node.js 20
       #   uses: actions/setup-node@v4
@@ -32,11 +39,10 @@ jobs:
         id: ci_result
         run: |
           #!/bin/bash
-          echo "`$date`" > changes.txt
-
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
-
+          echo "`$date`" > changes.txt
+               
           if [ $? -ne 0 ]; then
               echo "status=1" >> $GITHUB_OUTPUT
               exit $0
@@ -52,7 +58,6 @@ jobs:
 
           git commit -m "chore: lint project"
 
-
           git push origin $BRANCH
           status=$?
           if [ $status -ne 0 ]; then
@@ -63,7 +68,7 @@ jobs:
           echo "status=0" >> $GITHUB_OUTPUT
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          BRANCH: ${{ github.head_ref }}
+          BRANCH: ${{ steps.pr_branch.outputs.branch }}
 
       - name: Post success result
         uses: actions-cool/issues-helper@v3

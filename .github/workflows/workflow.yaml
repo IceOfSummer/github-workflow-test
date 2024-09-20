@@ -5,22 +5,80 @@ on:
 
 jobs:
   running_ci:
-    name: Lint project and test.
-    if: ${{ github.event.comment.body == '/run-ci' }}
+    name: Run CI.
+    if: ${{ github.event.issue.pull_request && github.event.comment.body == '/run-ci' }}
     permissions:
       issues: write
       pull-requests: write
       contents: write
     runs-on: ubuntu-latest
     steps:
-      - name: Create comment
+      - name: Check out the repository
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ github.head_ref }}
+
+      # - name: Use Node.js 20
+      #   uses: actions/setup-node@v4
+      #   with:
+      #     node-version: "20"
+      #     cache: 'npm'
+      #     cache-dependency-path: package-lock.json
+
+      # - name: Install Dependencies
+      #   run: 'npm install'
+
+      - name: Do CI
+        id: ci_result
+        run: |
+          #!/bin/bash
+          echo "`$date`" > changes.txt
+
+          if [ $? -ne 0 ]; then
+              echo "status=1" >> $GITHUB_OUTPUT
+              exit $0
+          fi
+
+          git add *
+          status=`git status --short | wc -l`
+
+          if [ $status -eq 0 ]; then
+              echo "status=0" >> $GITHUB_OUTPUT
+              exit 0
+          fi
+
+          git commit -m "chore: lint project"
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+
+          git push origin $BRANCH
+          status=$?
+          if [ $status -ne 0 ]; then
+              # unexpetced
+              exit $status
+          fi
+
+          echo "status=0" >> $GITHUB_OUTPUT
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          BRANCH: ${{ github.head_ref }}
+
+      - name: Post success result
         uses: actions-cool/issues-helper@v3
+        if: ${{ steps.ci_result.outputs.status == 0 }}
         with:
           actions: 'create-comment'
           token: ${{ secrets.GITHUB_TOKEN }}
           issue-number: ${{ github.event.issue.number }}
           body: |
-            Hello ${{ github.event.issue.user.login }}. Add some comments.
+            @${{ github.event.issue.user.login }}, the job `/run-ci` has executed successfully, every thing is ok!
 
-            你好 ${{ github.event.issue.user.login }}。巴拉巴拉。
-          emoji: '+1,heart'
+      - name: Post fail result
+        uses: actions-cool/issues-helper@v3
+        if: ${{ steps.ci_result.outputs.status == 1 }}
+        with:
+          actions: 'create-comment'
+          token: ${{ secrets.GITHUB_TOKEN }}
+          issue-number: ${{ github.event.issue.number }}
+          body: |
+            @${{ github.event.issue.user.login }}, running job `/run-ci` failed.

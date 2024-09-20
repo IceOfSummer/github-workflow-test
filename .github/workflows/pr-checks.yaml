@@ -1,0 +1,56 @@
+name: Create pull request checks
+
+on:
+  pull_request:
+    types: [synchronize, opened]
+    branches:
+      - main
+jobs:
+  add_checks:
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+      pull-requests: write
+      contents: write
+    steps:
+      - name: Add checks
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const pr_url = "${{ github.event.issue.pull_request.url }}";
+            const pr_number = parseInt(pr_url.split('/').pop());
+            const pr = await github.rest.pulls.get({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: pr_number,
+            });
+
+            github.rest.checks.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              name: 'Unit Test',
+              head_sha: pr.data.head.sha,
+              actions: [
+                {
+                  label: 'Unit Test',
+                  description: 'Run unit test',
+                  identifier: 'unit-test'
+                }
+              ]
+            })
+            
+            github.rest.checks.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              name: 'Lint Project',
+              head_sha: pr.data.head.sha,
+              actions: [
+                {
+                  label: 'Lint Project',
+                  description: 'Run eslint to fix the project.',
+                  identifier: 'lint'
+                }
+              ]
+            })
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

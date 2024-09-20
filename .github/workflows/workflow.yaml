@@ -25,11 +25,9 @@ jobs:
               repo: context.repo.repo,
               pull_number: pr_number,
             });
+            console.log(pr.data)
             return pr.data.head.ref;
           result-encoding: string
-          result: pr_branch
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Check out the repository
         uses: actions/checkout@v3

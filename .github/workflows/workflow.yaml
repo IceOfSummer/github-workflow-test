@@ -49,7 +49,6 @@ jobs:
         id: ci_result
         run: |
           #!/bin/bash
-#          npm run lint
           echo "`$date`" > changes.txt
                
           if [ $? -ne 0 ]; then
@@ -64,9 +63,7 @@ jobs:
               echo "status=0" >> $GITHUB_OUTPUT
               exit 0
           fi
-
           git commit -m "chore: lint project"
-
           git push origin $BRANCH
           status=$?
           if [ $status -ne 0 ]; then

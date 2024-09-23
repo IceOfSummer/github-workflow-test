@@ -16,15 +16,17 @@ jobs:
       - name: Do CI
         id: ci_result
         run: |
-          echo "changed=1" >> $GITHUB_OUTPUT
+          echo "changed=1" >> "$GITHUB_OUTPUT"
+          echo "hello"
+          echo $BRANCH
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           BRANCH: ${{ steps.pr_branch.outputs.result }}
       - name: echo
-        run: echo $CHANGED
+        run: echo $CHANGED && echo "hello??"
         env:
           CHANGED: ${{ job.running_ci.stpes.ci_result.changed }}
-          
+
     outputs:
       changed: ${{ job.running_ci.stpes.ci_result.changed }}
   test:
@@ -33,6 +35,6 @@ jobs:
     needs: running_ci
     steps:
       - name: echo
-        run: echo $CHANGED && echo $env
+        run: echo $CHANGED && env
         env:
           CHANGED: ${{ needs.running_ci.outputs.changed }}

@@ -1,0 +1,341 @@
+
+on:
+  issue_comment:
+    types: [ created ]
+
+
+jobs:
+  running_ci:
+    name: Run CI.
+    if: ${{ github.event.issue.pull_request && github.event.comment.body == '/run-ci' }}
+    permissions:
+      issues: write
+      pull-requests: write
+      contents: write
+    runs-on: ubuntu-latest
+    steps:
+      - name: Get pull request branch
+        id: pr_branch
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const pr_url = "${{ github.event.issue.pull_request.url }}";
+            const pr_number = parseInt(pr_url.split('/').pop());
+            const pr = await github.rest.pulls.get({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: pr_number,
+            });
+            return pr.data.head.ref;
+          result-encoding: string
+
+      - name: Check out the repository
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ steps.pr_branch.outputs.branch }}
+
+# pr.data:
+# {
+#   url: 'https://api.github.com/repos/IceOfSummer/github-workflow-test/pulls/1',
+#   id: 2080520158,
+#   node_id: 'PR_kwDOMz9lhM58Ajfe',
+#   html_url: 'https://github.com/IceOfSummer/github-workflow-test/pull/1',
+#   diff_url: 'https://github.com/IceOfSummer/github-workflow-test/pull/1.diff',
+#   patch_url: 'https://github.com/IceOfSummer/github-workflow-test/pull/1.patch',
+#   issue_url: 'https://api.github.com/repos/IceOfSummer/github-workflow-test/issues/1',
+#   number: 1,
+#   state: 'open',
+#   locked: false,
+#   title: 'Create README.md',
+#   user: {
+#     login: 'IceOfSummer',
+#     id: 72915970,
+#     node_id: 'MDQ6VXNlcjcyOTE1OTcw',
+#     avatar_url: 'https://avatars.githubusercontent.com/u/72915970?v=4',
+#     gravatar_id: '',
+#     url: 'https://api.github.com/users/IceOfSummer',
+#     html_url: 'https://github.com/IceOfSummer',
+#     followers_url: 'https://api.github.com/users/IceOfSummer/followers',
+#     following_url: 'https://api.github.com/users/IceOfSummer/following{/other_user}',
+#     gists_url: 'https://api.github.com/users/IceOfSummer/gists{/gist_id}',
+#     starred_url: 'https://api.github.com/users/IceOfSummer/starred{/owner}{/repo}',
+#     subscriptions_url: 'https://api.github.com/users/IceOfSummer/subscriptions',
+#     organizations_url: 'https://api.github.com/users/IceOfSummer/orgs',
+#     repos_url: 'https://api.github.com/users/IceOfSummer/repos',
+#     events_url: 'https://api.github.com/users/IceOfSummer/events{/privacy}',
+#     received_events_url: 'https://api.github.com/users/IceOfSummer/received_events',
+#     type: 'User',
+#     site_admin: false
+#   },
+#   body: null,
+#   created_at: '2024-09-19T09:37:59Z',
+#   updated_at: '2024-09-20T03:10:32Z',
+#   closed_at: null,
+#   merged_at: null,
+#   merge_commit_sha: 'c2c3e27f8aba02db11deadef00828bce8a84091d',
+#   assignee: null,
+#   assignees: [],
+#   requested_reviewers: [],
+#   requested_teams: [],
+#   labels: [],
+#   milestone: null,
+#   draft: false,
+#   commits_url: 'https://api.github.com/repos/IceOfSummer/github-workflow-test/pulls/1/commits',
+#   review_comments_url: 'https://api.github.com/repos/IceOfSummer/github-workflow-test/pulls/1/comments',
+#   review_comment_url: 'https://api.github.com/repos/IceOfSummer/github-workflow-test/pulls/comments{/number}',
+#   comments_url: 'https://api.github.com/repos/IceOfSummer/github-workflow-test/issues/1/comments',
+#   statuses_url: 'https://api.github.com/repos/IceOfSummer/github-workflow-test/statuses/5bffa3b7df6d9958f410c39264b1939f6732cae8',
+#   head: {
+#     label: 'IceOfSummer:IceOfSummer-patch-1',
+#     ref: 'IceOfSummer-patch-1',
+#     sha: '5bffa3b7df6d9958f410c39264b1939f6732cae8',
+#     user: {
+#       login: 'IceOfSummer',
+#       id: 72915970,
+#       node_id: 'MDQ6VXNlcjcyOTE1OTcw',
+#       avatar_url: 'https://avatars.githubusercontent.com/u/72915970?v=4',
+#       gravatar_id: '',
+#       url: 'https://api.github.com/users/IceOfSummer',
+#       html_url: 'https://github.com/IceOfSummer',
+#       followers_url: 'https://api.github.com/users/IceOfSummer/followers',
+#       following_url: 'https://api.github.com/users/IceOfSummer/following{/other_user}',
+#       gists_url: 'https://api.github.com/users/IceOfSummer/gists{/gist_id}',
+#       starred_url: 'https://api.github.com/users/IceOfSummer/starred{/owner}{/repo}',
+#       subscriptions_url: 'https://api.github.com/users/IceOfSummer/subscriptions',
+#       organizations_url: 'https://api.github.com/users/IceOfSummer/orgs',
+#       repos_url: 'https://api.github.com/users/IceOfSummer/repos',
+#       events_url: 'https://api.github.com/users/IceOfSummer/events{/privacy}',
+#       received_events_url: 'https://api.github.com/users/IceOfSummer/received_events',
+#       type: 'User',
+#       site_admin: false
+#     },
+#     repo: {
+#       id: 859792772,
+#       node_id: 'R_kgDOMz9lhA',
+#       name: 'github-workflow-test',
+#       full_name: 'IceOfSummer/github-workflow-test',
+#       private: false,
+#       owner: [Object],
+#       html_url: 'https://github.com/IceOfSummer/github-workflow-test',
+#       description: 'Test github workflow.',
+#       fork: false,
+#       url: 'https://api.github.com/repos/IceOfSummer/github-workflow-test',
+#       forks_url: 'https://api.github.com/repos/IceOfSummer/github-workflow-test/forks',
+#       keys_url: 'https://api.github.com/repos/IceOfSummer/github-workflow-test/keys{/key_id}',
+#       collaborators_url: 'https://api.github.com/repos/IceOfSummer/github-workflow-test/collaborators{/collaborator}',
+#       teams_url: 'https://api.github.com/repos/IceOfSummer/github-workflow-test/teams',
+#       hooks_url: 'https://api.github.com/repos/IceOfSummer/github-workflow-test/hooks',
+#       issue_events_url: 'https://api.github.com/repos/IceOfSummer/github-workflow-test/issues/events{/number}',
+#       events_url: 'https://api.github.com/repos/IceOfSummer/github-workflow-test/events',
+#       assignees_url: 'https://api.github.com/repos/IceOfSummer/github-workflow-test/assignees{/user}',
+#       branches_url: 'https://api.github.com/repos/IceOfSummer/github-workflow-test/branches{/branch}',
+#       tags_url: 'https://api.github.com/repos/IceOfSummer/github-workflow-test/tags',
+#       blobs_url: 'https://api.github.com/repos/IceOfSummer/github-workflow-test/git/blobs{/sha}',
+#       git_tags_url: 'https://api.github.com/repos/IceOfSummer/github-workflow-test/git/tags{/sha}',
+#       git_refs_url: 'https://api.github.com/repos/IceOfSummer/github-workflow-test/git/refs{/sha}',
+#       trees_url: 'https://api.github.com/repos/IceOfSummer/github-workflow-test/git/trees{/sha}',
+#       statuses_url: 'https://api.github.com/repos/IceOfSummer/github-workflow-test/statuses/{sha}',
+#       languages_url: 'https://api.github.com/repos/IceOfSummer/github-workflow-test/languages',
+#       stargazers_url: 'https://api.github.com/repos/IceOfSummer/github-workflow-test/stargazers',
+#       contributors_url: 'https://api.github.com/repos/IceOfSummer/github-workflow-test/contributors',
+#       subscribers_url: 'https://api.github.com/repos/IceOfSummer/github-workflow-test/subscribers',
+#       subscription_url: 'https://api.github.com/repos/IceOfSummer/github-workflow-test/subscription',
+#       commits_url: 'https://api.github.com/repos/IceOfSummer/github-workflow-test/commits{/sha}',
+#       git_commits_url: 'https://api.github.com/repos/IceOfSummer/github-workflow-test/git/commits{/sha}',
+#       comments_url: 'https://api.github.com/repos/IceOfSummer/github-workflow-test/comments{/number}',
+#       issue_comment_url: 'https://api.github.com/repos/IceOfSummer/github-workflow-test/issues/comments{/number}',
+#       contents_url: 'https://api.github.com/repos/IceOfSummer/github-workflow-test/contents/{+path}',
+#       compare_url: 'https://api.github.com/repos/IceOfSummer/github-workflow-test/compare/{base}...{head}',
+#       merges_url: 'https://api.github.com/repos/IceOfSummer/github-workflow-test/merges',
+#       archive_url: 'https://api.github.com/repos/IceOfSummer/github-workflow-test/{archive_format}{/ref}',
+#       downloads_url: 'https://api.github.com/repos/IceOfSummer/github-workflow-test/downloads',
+#       issues_url: 'https://api.github.com/repos/IceOfSummer/github-workflow-test/issues{/number}',
+#       pulls_url: 'https://api.github.com/repos/IceOfSummer/github-workflow-test/pulls{/number}',
+#       milestones_url: 'https://api.github.com/repos/IceOfSummer/github-workflow-test/milestones{/number}',
+#       notifications_url: 'https://api.github.com/repos/IceOfSummer/github-workflow-test/notifications{?since,all,participating}',
+#       labels_url: 'https://api.github.com/repos/IceOfSummer/github-workflow-test/labels{/name}',
+#       releases_url: 'https://api.github.com/repos/IceOfSummer/github-workflow-test/releases{/id}',
+#       deployments_url: 'https://api.github.com/repos/IceOfSummer/github-workflow-test/deployments',
+#       created_at: '2024-09-19T09:35:57Z',
+#       updated_at: '2024-09-20T03:10:01Z',
+#       pushed_at: '2024-09-20T03:09:58Z',
+#       git_url: 'git://github.com/IceOfSummer/github-workflow-test.git',
+#       ssh_url: 'git@github.com:IceOfSummer/github-workflow-test.git',
+#       clone_url: 'https://github.com/IceOfSummer/github-workflow-test.git',
+#       svn_url: 'https://github.com/IceOfSummer/github-workflow-test',
+#       homepage: null,
+#       size: 11,
+#       stargazers_count: 0,
+#       watchers_count: 0,
+#       language: null,
+#       has_issues: true,
+#       has_projects: true,
+#       has_downloads: true,
+#       has_wiki: true,
+#       has_pages: false,
+#       has_discussions: false,
+#       forks_count: 0,
+#       mirror_url: null,
+#       archived: false,
+#       disabled: false,
+#       open_issues_count: 1,
+#       license: null,
+#       allow_forking: true,
+#       is_template: false,
+#       web_commit_signoff_required: false,
+#       topics: [],
+#       visibility: 'public',
+#       forks: 0,
+#       open_issues: 1,
+#       watchers: 0,
+#       default_branch: 'main'
+#     }
+#   },
+#   base: {
+#     label: 'IceOfSummer:main',
+#     ref: 'main',
+#     sha: '3f907ff2af6dc62b3ba3b8c1f95438d31f0ea8a1',
+#     user: {
+#       login: 'IceOfSummer',
+#       id: 72915970,
+#       node_id: 'MDQ6VXNlcjcyOTE1OTcw',
+#       avatar_url: 'https://avatars.githubusercontent.com/u/72915970?v=4',
+#       gravatar_id: '',
+#       url: 'https://api.github.com/users/IceOfSummer',
+#       html_url: 'https://github.com/IceOfSummer',
+#       followers_url: 'https://api.github.com/users/IceOfSummer/followers',
+#       following_url: 'https://api.github.com/users/IceOfSummer/following{/other_user}',
+#       gists_url: 'https://api.github.com/users/IceOfSummer/gists{/gist_id}',
+#       starred_url: 'https://api.github.com/users/IceOfSummer/starred{/owner}{/repo}',
+#       subscriptions_url: 'https://api.github.com/users/IceOfSummer/subscriptions',
+#       organizations_url: 'https://api.github.com/users/IceOfSummer/orgs',
+#       repos_url: 'https://api.github.com/users/IceOfSummer/repos',
+#       events_url: 'https://api.github.com/users/IceOfSummer/events{/privacy}',
+#       received_events_url: 'https://api.github.com/users/IceOfSummer/received_events',
+#       type: 'User',
+#       site_admin: false
+#     },
+#     repo: {
+#       id: 859792772,
+#       node_id: 'R_kgDOMz9lhA',
+#       name: 'github-workflow-test',
+#       full_name: 'IceOfSummer/github-workflow-test',
+#       private: false,
+#       owner: [Object],
+#       html_url: 'https://github.com/IceOfSummer/github-workflow-test',
+#       description: 'Test github workflow.',
+#       fork: false,
+#       url: 'https://api.github.com/repos/IceOfSummer/github-workflow-test',
+#       forks_url: 'https://api.github.com/repos/IceOfSummer/github-workflow-test/forks',
+#       keys_url: 'https://api.github.com/repos/IceOfSummer/github-workflow-test/keys{/key_id}',
+#       collaborators_url: 'https://api.github.com/repos/IceOfSummer/github-workflow-test/collaborators{/collaborator}',
+#       teams_url: 'https://api.github.com/repos/IceOfSummer/github-workflow-test/teams',
+#       hooks_url: 'https://api.github.com/repos/IceOfSummer/github-workflow-test/hooks',
+#       issue_events_url: 'https://api.github.com/repos/IceOfSummer/github-workflow-test/issues/events{/number}',
+#       events_url: 'https://api.github.com/repos/IceOfSummer/github-workflow-test/events',
+#       assignees_url: 'https://api.github.com/repos/IceOfSummer/github-workflow-test/assignees{/user}',
+#       branches_url: 'https://api.github.com/repos/IceOfSummer/github-workflow-test/branches{/branch}',
+#       tags_url: 'https://api.github.com/repos/IceOfSummer/github-workflow-test/tags',
+#       blobs_url: 'https://api.github.com/repos/IceOfSummer/github-workflow-test/git/blobs{/sha}',
+#       git_tags_url: 'https://api.github.com/repos/IceOfSummer/github-workflow-test/git/tags{/sha}',
+#       git_refs_url: 'https://api.github.com/repos/IceOfSummer/github-workflow-test/git/refs{/sha}',
+#       trees_url: 'https://api.github.com/repos/IceOfSummer/github-workflow-test/git/trees{/sha}',
+#       statuses_url: 'https://api.github.com/repos/IceOfSummer/github-workflow-test/statuses/{sha}',
+#       languages_url: 'https://api.github.com/repos/IceOfSummer/github-workflow-test/languages',
+#       stargazers_url: 'https://api.github.com/repos/IceOfSummer/github-workflow-test/stargazers',
+#       contributors_url: 'https://api.github.com/repos/IceOfSummer/github-workflow-test/contributors',
+#       subscribers_url: 'https://api.github.com/repos/IceOfSummer/github-workflow-test/subscribers',
+#       subscription_url: 'https://api.github.com/repos/IceOfSummer/github-workflow-test/subscription',
+#       commits_url: 'https://api.github.com/repos/IceOfSummer/github-workflow-test/commits{/sha}',
+#       git_commits_url: 'https://api.github.com/repos/IceOfSummer/github-workflow-test/git/commits{/sha}',
+#       comments_url: 'https://api.github.com/repos/IceOfSummer/github-workflow-test/comments{/number}',
+#       issue_comment_url: 'https://api.github.com/repos/IceOfSummer/github-workflow-test/issues/comments{/number}',
+#       contents_url: 'https://api.github.com/repos/IceOfSummer/github-workflow-test/contents/{+path}',
+#       compare_url: 'https://api.github.com/repos/IceOfSummer/github-workflow-test/compare/{base}...{head}',
+#       merges_url: 'https://api.github.com/repos/IceOfSummer/github-workflow-test/merges',
+#       archive_url: 'https://api.github.com/repos/IceOfSummer/github-workflow-test/{archive_format}{/ref}',
+#       downloads_url: 'https://api.github.com/repos/IceOfSummer/github-workflow-test/downloads',
+#       issues_url: 'https://api.github.com/repos/IceOfSummer/github-workflow-test/issues{/number}',
+#       pulls_url: 'https://api.github.com/repos/IceOfSummer/github-workflow-test/pulls{/number}',
+#       milestones_url: 'https://api.github.com/repos/IceOfSummer/github-workflow-test/milestones{/number}',
+#       notifications_url: 'https://api.github.com/repos/IceOfSummer/github-workflow-test/notifications{?since,all,participating}',
+#       labels_url: 'https://api.github.com/repos/IceOfSummer/github-workflow-test/labels{/name}',
+#       releases_url: 'https://api.github.com/repos/IceOfSummer/github-workflow-test/releases{/id}',
+#       deployments_url: 'https://api.github.com/repos/IceOfSummer/github-workflow-test/deployments',
+#       created_at: '2024-09-19T09:35:57Z',
+#       updated_at: '2024-09-20T03:10:01Z',
+#       pushed_at: '2024-09-20T03:09:58Z',
+#       git_url: 'git://github.com/IceOfSummer/github-workflow-test.git',
+#       ssh_url: 'git@github.com:IceOfSummer/github-workflow-test.git',
+#       clone_url: 'https://github.com/IceOfSummer/github-workflow-test.git',
+#       svn_url: 'https://github.com/IceOfSummer/github-workflow-test',
+#       homepage: null,
+#       size: 11,
+#       stargazers_count: 0,
+#       watchers_count: 0,
+#       language: null,
+#       has_issues: true,
+#       has_projects: true,
+#       has_downloads: true,
+#       has_wiki: true,
+#       has_pages: false,
+#       has_discussions: false,
+#       forks_count: 0,
+#       mirror_url: null,
+#       archived: false,
+#       disabled: false,
+#       open_issues_count: 1,
+#       license: null,
+#       allow_forking: true,
+#       is_template: false,
+#       web_commit_signoff_required: false,
+#       topics: [],
+#       visibility: 'public',
+#       forks: 0,
+#       open_issues: 1,
+#       watchers: 0,
+#       default_branch: 'main'
+#     }
+#   },
+#   _links: {
+#     self: {
+#       href: 'https://api.github.com/repos/IceOfSummer/github-workflow-test/pulls/1'
+#     },
+#     html: {
+#       href: 'https://github.com/IceOfSummer/github-workflow-test/pull/1'
+#     },
+#     issue: {
+#       href: 'https://api.github.com/repos/IceOfSummer/github-workflow-test/issues/1'
+#     },
+#     comments: {
+#       href: 'https://api.github.com/repos/IceOfSummer/github-workflow-test/issues/1/comments'
+#     },
+#     review_comments: {
+#       href: 'https://api.github.com/repos/IceOfSummer/github-workflow-test/pulls/1/comments'
+#     },
+#     review_comment: {
+#       href: 'https://api.github.com/repos/IceOfSummer/github-workflow-test/pulls/comments{/number}'
+#     },
+#     commits: {
+#       href: 'https://api.github.com/repos/IceOfSummer/github-workflow-test/pulls/1/commits'
+#     },
+#     statuses: {
+#       href: 'https://api.github.com/repos/IceOfSummer/github-workflow-test/statuses/5bffa3b7df6d9958f410c39264b1939f6732cae8'
+#     }
+#   },
+#   author_association: 'OWNER',
+#   auto_merge: null,
+#   active_lock_reason: null,
+#   merged: false,
+#   mergeable: true,
+#   rebaseable: true,
+#   mergeable_state: 'clean',
+#   merged_by: null,
+#   comments: 18,
+#   review_comments: 0,
+#   maintainer_can_modify: false,
+#   commits: 1,
+#   additions: 3,
+#   deletions: 0,
+#   changed_files: 1
+# }

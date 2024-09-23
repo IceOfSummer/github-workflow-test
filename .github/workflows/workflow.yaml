@@ -13,90 +13,21 @@ jobs:
       contents: write
     runs-on: ubuntu-latest
     steps:
-      - name: Get pull request branch
-        id: pr_branch
-        uses: actions/github-script@v7
-        with:
-          script: |
-            const pr_url = "${{ github.event.issue.pull_request.url }}";
-            const pr_number = parseInt(pr_url.split('/').pop());
-            const pr = await github.rest.pulls.get({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              pull_number: pr_number,
-            });
-            console.log(pr.data)
-            return pr.data.head.ref;
-          result-encoding: string
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Check out the repository
-        uses: actions/checkout@v3
-        with:
-          ref: ${{ steps.pr_branch.outputs.result }}
-
-#      - name: Use Node.js 20
-#        uses: actions/setup-node@v4
-#        with:
-#          node-version: "20"
-#          cache: 'npm'
-#          cache-dependency-path: package-lock.json
-#
-#      - name: Install Dependencies
-#        run: 'npm install'
-
       - name: Do CI
         id: ci_result
         run: |
-          #!/bin/bash
-          git config --global user.name "github-actions[bot]"
-          git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          echo "`$date`" > changes.txt
-               
-          if [ $? -ne 0 ]; then
-              echo "status=1" >> $GITHUB_OUTPUT
-              exit $0
-          fi
-
-          git add *
-          status=`git status --short | wc -l`
-
-          if [ $status -eq 0 ]; then
-              echo "status=0" >> $GITHUB_OUTPUT
-              exit 0
-          fi
-
-          git commit -m "chore: lint project"
-
-          git push origin $BRANCH
-          status=$?
-          if [ $status -ne 0 ]; then
-              # unexpetced
-              exit $status
-          fi
-
-          echo "status=0" >> $GITHUB_OUTPUT
+          echo "changed=1" >> $GITHUB_OUTPUT
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           BRANCH: ${{ steps.pr_branch.outputs.result }}
-
-      - name: Post success result
-        uses: actions-cool/issues-helper@v3
-        if: ${{ steps.ci_result.outputs.status == 0 }}
-        with:
-          actions: 'create-comment'
-          token: ${{ secrets.GITHUB_TOKEN }}
-          issue-number: ${{ github.event.issue.number }}
-          body: |
-            @${{ github.event.issue.user.login }}, the job `/run-ci` has executed successfully, every thing is ok!
-
-      - name: Post fail result
-        uses: actions-cool/issues-helper@v3
-        if: ${{ steps.ci_result.outputs.status == 1 }}
-        with:
-          actions: 'create-comment'
-          token: ${{ secrets.GITHUB_TOKEN }}
-          issue-number: ${{ github.event.issue.number }}
-          body: |
-            @${{ github.event.issue.user.login }}, running job `/run-ci` failed.
+    outputs:
+      changed: ${{ job.running_ci.stpes.ci_result.changed }}
+  test:
+    name: 'Run unit test'
+    runs-on: ubuntu-latest
+    needs: running_ci
+    steps:
+      - name: echo
+        run: echo $CHANGED && echo $env
+        env:
+          CHANGED: ${{ need.running_ci.outputs.changed }}

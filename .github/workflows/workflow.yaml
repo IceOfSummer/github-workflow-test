@@ -20,6 +20,11 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           BRANCH: ${{ steps.pr_branch.outputs.result }}
+      - name: echo
+        run: echo $CHANGED
+        env:
+          CHANGED: ${{ job.running_ci.stpes.ci_result.changed }}
+          
     outputs:
       changed: ${{ job.running_ci.stpes.ci_result.changed }}
   test:

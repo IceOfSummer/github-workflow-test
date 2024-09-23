@@ -17,18 +17,13 @@ jobs:
         id: ci_result
         run: |
           echo "changed=1" >> "$GITHUB_OUTPUT"
-          echo "hello"
-          echo $BRANCH
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          BRANCH: ${{ steps.pr_branch.outputs.result }}
       - name: echo
         run: echo $CHANGED && echo "hello??"
         env:
-          CHANGED: ${{ job.running_ci.stpes.ci_result.changed }}
+          CHANGED: ${{ stpes.ci_result.outputs.changed }}
 
     outputs:
-      changed: ${{ job.running_ci.stpes.ci_result.changed }}
+      changed: ${{ stpes.ci_result.outputs.changed }}
   test:
     name: 'Run unit test'
     runs-on: ubuntu-latest

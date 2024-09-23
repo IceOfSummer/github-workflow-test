@@ -16,7 +16,7 @@ jobs:
       - name: Do CI
         id: ci_result
         run: |
-          echo "changed=1" >> "$GITHUB_OUTPUT"
+          echo "nothing"
       - name: echo
         run: echo $CHANGED && echo "hello??"
         env:
@@ -27,6 +27,7 @@ jobs:
   test:
     name: 'Run unit test'
     runs-on: ubuntu-latest
+    if: ${{ needs.running_ci.outputs.changed == 0 }}
     needs: running_ci
     steps:
       - name: echo

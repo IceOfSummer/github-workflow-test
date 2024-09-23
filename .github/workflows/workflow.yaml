@@ -20,10 +20,10 @@ jobs:
       - name: echo
         run: echo $CHANGED && echo "hello??"
         env:
-          CHANGED: ${{ stpes.ci_result.outputs.changed }}
+          CHANGED: ${{ steps.ci_result.outputs.changed }}
 
     outputs:
-      changed: ${{ stpes.ci_result.outputs.changed }}
+      changed: ${{ steps.ci_result.outputs.changed }}
   test:
     name: 'Run unit test'
     runs-on: ubuntu-latest

@@ -30,4 +30,4 @@ jobs:
       - name: echo
         run: echo $CHANGED && echo $env
         env:
-          CHANGED: ${{ need.running_ci.outputs.changed }}
+          CHANGED: ${{ needs.running_ci.outputs.changed }}

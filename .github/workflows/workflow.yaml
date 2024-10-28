@@ -13,14 +13,13 @@ jobs:
       contents: write
     runs-on: ubuntu-latest
     steps:
-      - name: Do CI
-        id: ci_result
-        run: |
-          echo "nothing"
-      - name: echo
-        run: echo $CHANGED && echo "hello??"
-        env:
-          CHANGED: ${{ steps.ci_result.outputs.changed }}
+      - name: Hello world action step
+        id: hello
+        uses: nextjs-particlex-theme/sitemap-generate@75b6b1fc1ba92d4e444e813a3725aa11f511eaab
+        with:
+          who-to-greet: 'Mona the Octocat'
+
+
 
     outputs:
       changed: ${{ steps.ci_result.outputs.changed }}

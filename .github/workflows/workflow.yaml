@@ -13,13 +13,20 @@ jobs:
       contents: write
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout Main Repository
+        uses: actions/checkout@v4
+        with:
+          repository: IceOfSummer/github-workflow-test
+          ref: master
+          path: template
       - name: Hello world action step
         id: hello
         uses: nextjs-particlex-theme/sitemap-generate@master
         with:
-          who-to-greet: 'Mona the Octocat'
-
-
+          source-path: 'template'
+          output-path: 'html'
+          base-path: 'https://foo.bar'
+          commit-message: 'Update sitemap.'
 
     outputs:
       changed: ${{ steps.ci_result.outputs.changed }}
